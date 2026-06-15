@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8" />
+    <title>프로젝트 관리</title>
+    <link rel="stylesheet" href="/static/style.css" />
+</head>
+<body>
+    <main class="container">
+        <h1>프로젝트 관리</h1>
+        <p class="sub">프로젝트 추가, 수정, 삭제를 할 수 있습니다.</p>
+        <p><a href="/">← 홈으로 돌아가기</a></p>
+
+        <section class="card">
+            {% if edit_project %}
+            <h2>프로젝트 수정</h2>
+            <form method="post" action="/web/projects/{{ edit_project.id }}/edit" class="form-grid">
+            {% else %}
+            <h2>프로젝트 추가</h2>
+            <form method="post" action="/web/projects" class="form-grid">
+            {% endif %}
+                <label>
+                    생성자
+                    <select name="creator_id" required>
+                        {% for user in users %}
+                        <option value="{{ user.id }}" {% if edit_project and edit_project.creator_id == user.id %}selected{% endif %}>{{ user.name }} ({{ user.email }})</option>
+                        {% endfor %}
+                    </select>
+                </label>
+
+                <label>
+                    프로젝트명
+                    <input name="title" required value="{{ edit_project.title if edit_project else '' }}" />
+                </label>
+
+                <label>
+                    분야
+                    <select name="domain" required>
+                        {% set selected_domain = edit_project.domain if edit_project else '교육' %}
+                        {% for domain in ['교육', '헬스케어', '커머스', '금융', '게임', '생산성', '소셜', 'AI'] %}
+                        <option value="{{ domain }}" {% if selected_domain == domain %}selected{% endif %}>{{ domain }}</option>
+                        {% endfor %}
+                    </select>
+                </label>
+
+                <label>
+                    난이도 (1~5)
+                    <input name="difficulty" type="number" min="1" max="5" required value="{{ edit_project.difficulty if edit_project else 3 }}" />
+                </label>
+
+                <label>
+                    주간 필요 시간
+                    <input name="required_hours" type="number" min="1" required value="{{ edit_project.required_hours if edit_project else 10 }}" />
+                </label>
+
+                <label>
+                    최대 팀원 수
+                    <input name="max_members" type="number" min="1" required value="{{ edit_project.max_members if edit_project else 4 }}" />
+                </label>
+
+                <label>
+                    팀 분위기
+                    <select name="team_atmosphere" required>
+                        {% set selected_atmosphere = edit_project.team_atmosphere if edit_project else '자유로운 분위기' %}
+                        {% for atmosphere in ['자유로운 분위기', '결과 중심', '친목 중심', '빠르게 실행', '꼼꼼한 계획'] %}
+                        <option value="{{ atmosphere }}" {% if selected_atmosphere == atmosphere %}selected{% endif %}>{{ atmosphere }}</option>
+                        {% endfor %}
+                    </select>
+                </label>
+
+                <label>
+                    선호 협업 스타일
+                    <select name="desired_collaboration_style" required>
+                        {% set selected_style = edit_project.desired_collaboration_style if edit_project else '계획형' %}
+                        {% for style in ['계획형', '자율형', '소통중심형', '빠른실행형'] %}
+                        <option value="{{ style }}" {% if selected_style == style %}selected{% endif %}>{{ style }}</option>
+                        {% endfor %}
+                    </select>
+                </label>
+
+                <label class="full">
+                    설명
+                    <textarea name="description" rows="4">{{ edit_project.description if edit_project and edit_project.description else '' }}</textarea>
+                </label>
+
+                <div class="full actions">
+                    <button type="submit">{{ '수정 완료' if edit_project else '프로젝트 추가' }}</button>
+                    {% if edit_project %}
+                    <a class="button-sub" href="/web/projects">수정 취소</a>
+                    {% endif %}
+                </div>
+            </form>
+        </section>
+
+        <section class="card">
+            <h2>프로젝트 목록</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>프로젝트</th>
+                        <th>생성자</th>
+                        <th>분야</th>
+                        <th>난이도</th>
+                        <th>필요 시간</th>
+                        <th>최대 인원</th>
+                        <th>팀 분위기</th>
+                        <th>관리</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for project in projects %}
+                    <tr>
+                        <td>{{ project.id }}</td>
+                        <td>
+                            <strong>{{ project.title }}</strong>
+                            {% if project.description %}
+                            <p class="table-note">{{ project.description }}</p>
+                            {% endif %}
+                        </td>
+                        <td>{{ project.creator.name if project.creator else '-' }}</td>
+                        <td>{{ project.domain }}</td>
+                        <td>{{ project.difficulty }}</td>
+                        <td>{{ project.required_hours }}시간</td>
+                        <td>{{ project.max_members }}명</td>
+                        <td>{{ project.team_atmosphere }}</td>
+                        <td class="row-actions">
+                            <a href="/web/projects/{{ project.id }}/edit">수정</a>
+                            <a href="/web/projects/{{ project.id }}/recommendations">추천</a>
+                            <form method="post" action="/web/projects/{{ project.id }}/delete" onsubmit="return confirm('{{ project.title }} 프로젝트를 삭제할까요? 연결된 지원/추천 데이터도 함께 삭제됩니다.');">
+                                <button type="submit" class="danger">삭제</button>
+                            </form>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </section>
+    </main>
+</body>
+</html>

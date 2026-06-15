@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8" />
+    <title>추천 프로젝트</title>
+    <link rel="stylesheet" href="/static/style.css" />
+</head>
+<body>
+<main class="container">
+    <a href="/">← 홈으로</a>
+    <h1>{{ user.name }}님 추천 프로젝트</h1>
+    <p class="sub">{{ user.interest_domain }} · {{ user.collaboration_style }} · {{ user.preferred_team_atmosphere }}</p>
+
+    <section class="card">
+        <table>
+            <thead>
+                <tr>
+                    <th>순위</th><th>프로젝트</th><th>분야</th><th>점수</th><th>기술</th><th>역할</th><th>시간</th><th>이유</th><th>지원</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for r in results %}
+                <tr>
+                    <td>{{ loop.index }}</td>
+                    <td>{{ r.title }}</td>
+                    <td>{{ r.domain }}</td>
+                    <td><strong>{{ r.score }}</strong></td>
+                    <td>{{ r.skill_score }}</td>
+                    <td>{{ r.role_score }}</td>
+                    <td>{{ r.time_score }}</td>
+                    <td>{{ r.reason }}</td>
+                    <td>
+                        <form method="post" action="/web/applications">
+                            <input type="hidden" name="user_id" value="{{ user.id }}" />
+                            <input type="hidden" name="project_id" value="{{ r.project_id }}" />
+                            <input type="hidden" name="role_id" value="{{ user.preferred_role_id }}" />
+                            <input type="hidden" name="message" value="추천 프로젝트에 지원합니다." />
+                            <button type="submit">지원</button>
+                        </form>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </section>
+</main>
+</body>
+</html>

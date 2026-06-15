@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8" />
+    <title>추천 팀원</title>
+    <link rel="stylesheet" href="/static/style.css" />
+</head>
+<body>
+<main class="container">
+    <a href="/">← 홈으로</a>
+    <h1>{{ project.title }} 추천 팀원</h1>
+    <p class="sub">{{ project.domain }} · 난이도 {{ project.difficulty }} · 필요 시간 {{ project.required_hours }}h · {{ project.team_atmosphere }}</p>
+
+    <section class="card">
+        <table>
+            <thead>
+                <tr>
+                    <th>순위</th><th>이름</th><th>점수</th><th>기술</th><th>역할</th><th>시간</th><th>분야</th><th>이유</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for r in results %}
+                <tr>
+                    <td>{{ loop.index }}</td>
+                    <td>{{ r.name }}</td>
+                    <td><strong>{{ r.score }}</strong></td>
+                    <td>{{ r.skill_score }}</td>
+                    <td>{{ r.role_score }}</td>
+                    <td>{{ r.time_score }}</td>
+                    <td>{{ r.domain_score }}</td>
+                    <td>{{ r.reason }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </section>
+</main>
+</body>
+</html>

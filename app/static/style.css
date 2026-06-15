@@ -1,0 +1,106 @@
+body {
+    margin: 0;
+    background: #f5f6fa;
+    color: #222;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+.container {
+    width: min(1100px, calc(100% - 32px));
+    margin: 40px auto;
+}
+h1 { margin-bottom: 8px; }
+.sub { color: #666; margin-top: 0; }
+.card {
+    background: white;
+    border-radius: 16px;
+    padding: 24px;
+    margin: 24px 0;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.06);
+}
+.grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 16px;
+}
+.item {
+    border: 1px solid #e4e7ee;
+    border-radius: 12px;
+    padding: 16px;
+    background: #fafbff;
+}
+a {
+    color: #246bfe;
+    text-decoration: none;
+    font-weight: 600;
+}
+table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 14px;
+}
+th, td {
+    border-bottom: 1px solid #e8e8e8;
+    padding: 12px;
+    text-align: left;
+    vertical-align: top;
+}
+th { background: #f0f3f8; }
+button {
+    border: 0;
+    border-radius: 8px;
+    background: #246bfe;
+    color: white;
+    padding: 8px 12px;
+    cursor: pointer;
+}
+.form-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 16px;
+}
+.form-grid label {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    font-weight: 600;
+}
+.form-grid input,
+.form-grid select,
+.form-grid textarea {
+    border: 1px solid #d8dce6;
+    border-radius: 10px;
+    padding: 10px 12px;
+    font: inherit;
+    background: white;
+}
+.form-grid .full {
+    grid-column: 1 / -1;
+}
+.actions {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+.button-sub {
+    display: inline-block;
+    border-radius: 8px;
+    background: #eef2ff;
+    padding: 8px 12px;
+}
+.row-actions {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    flex-wrap: wrap;
+}
+.row-actions form {
+    margin: 0;
+}
+button.danger {
+    background: #e03131;
+}
+.table-note {
+    margin: 6px 0 0;
+    color: #666;
+    font-size: 13px;
+}

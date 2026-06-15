@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8" />
+    <title>AI 팀 빌딩 플랫폼</title>
+    <link rel="stylesheet" href="/static/style.css" />
+</head>
+<body>
+    <main class="container">
+        <h1>AI 기반 프로젝트 팀 빌딩 플랫폼</h1>
+        <p class="sub">FastAPI + SQLAlchemy + RandomForestRegressor 추천 시스템</p>
+
+
+
+        <section class="card">
+            <h2>사용자 관리</h2>
+            <p>사용자를 추가, 수정, 삭제할 수 있습니다.</p>
+            <a href="/web/users">사용자 관리 페이지로 이동</a>
+        </section>
+
+        <section class="card">
+            <h2>프로젝트 관리</h2>
+            <p>프로젝트를 추가, 수정, 삭제할 수 있습니다.</p>
+            <a href="/web/projects">프로젝트 관리 페이지로 이동</a>
+        </section>
+
+        <section class="card">
+            <h2>프로젝트 기준 팀원 추천</h2>
+            <div class="grid">
+                {% for project in projects %}
+                <div class="item">
+                    <strong>{{ project.title }}</strong>
+                    <p>{{ project.domain }} · 난이도 {{ project.difficulty }} · {{ project.team_atmosphere }}</p>
+                    <a href="/web/projects/{{ project.id }}/recommendations">추천 팀원 보기</a>
+                </div>
+                {% endfor %}
+            </div>
+        </section>
+
+        <section class="card">
+            <h2>사용자 기준 프로젝트 추천</h2>
+            <div class="grid">
+                {% for user in users %}
+                <div class="item">
+                    <strong>{{ user.name }}</strong>
+                    <p>{{ user.interest_domain }} · {{ user.collaboration_style }} · {{ user.preferred_team_atmosphere }}</p>
+                    <a href="/web/users/{{ user.id }}/recommendations">추천 프로젝트 보기</a>
+                </div>
+                {% endfor %}
+            </div>
+        </section>
+    </main>
+</body>
+</html>
