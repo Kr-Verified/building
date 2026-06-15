@@ -94,6 +94,10 @@ class Application(Base):
     status: Mapped[str] = mapped_column(String(20), default="pending")
     message: Mapped[str | None] = mapped_column(Text)
 
+    user = relationship("User")
+    project = relationship("Project")
+    role = relationship("Role")
+
 class RecommendationResult(Base):
     __tablename__ = "recommendation_results"
 

@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8" />
+    <title>지원자 관리</title>
+    <link rel="stylesheet" href="/static/style.css" />
+</head>
+<body>
+<main class="container">
+    <a href="/web/projects">← 프로젝트 관리로</a>
+    <h1>{{ project.title }} 지원자 관리</h1>
+    <p class="sub">{{ project.domain }} · 난이도 {{ project.difficulty }} · 최대 {{ project.max_members }}명</p>
+    <p><a href="/web/projects/{{ project.id }}/recommendations">추천 팀원 보기</a></p>
+
+    <section class="card">
+        <h2>지원자 및 선발 현황</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>사용자</th>
+                    <th>역할</th>
+                    <th>상태</th>
+                    <th>메시지</th>
+                    <th>관리</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for application in applications %}
+                <tr>
+                    <td>{{ application.id }}</td>
+                    <td>
+                        <strong>{{ application.user.name if application.user else '-' }}</strong>
+                        {% if application.user %}
+                        <p class="table-note">
+                            {{ application.user.email }} · 경험 {{ application.user.experience_level }} · {{ application.user.available_hours }}시간
+                        </p>
+                        {% endif %}
+                    </td>
+                    <td>{{ application.role.name if application.role else '-' }}</td>
+                    <td>
+                        <strong>{{ status_labels.get(application.status, application.status) }}</strong>
+                    </td>
+                    <td>{{ application.message or '-' }}</td>
+                    <td class="row-actions">
+                        {% if application.status != 'accepted' %}
+                        <form method="post" action="/web/applications/{{ application.id }}/accept">
+                            <button type="submit">선발</button>
+                        </form>
+                        {% endif %}
+                        {% if application.status != 'rejected' %}
+                        <form method="post" action="/web/applications/{{ application.id }}/reject">
+                            <button type="submit" class="danger">거절</button>
+                        </form>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="6">아직 지원자나 선발된 팀원이 없습니다.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </section>
+</main>
+</body>
+</html>

@@ -33,6 +33,49 @@ def delete_project_with_dependencies(db: Session, project: models.Project):
     db.query(models.RecommendationResult).filter(models.RecommendationResult.project_id == project.id).delete()
     db.delete(project)
 
+def get_application_or_404(db: Session, application_id: int):
+    application = db.get(models.Application, application_id)
+    if not application:
+        raise HTTPException(status_code=404, detail="지원 내역을 찾을 수 없습니다.")
+    return application
+
+def create_or_update_application(
+    db: Session,
+    user_id: int,
+    project_id: int,
+    role_id: int,
+    message: str,
+    status: str,
+):
+    ensure_user_exists(db, user_id)
+    get_project_or_404(db, project_id)
+
+    application = (
+        db.query(models.Application)
+        .filter(
+            models.Application.user_id == user_id,
+            models.Application.project_id == project_id,
+        )
+        .first()
+    )
+    if application:
+        application.role_id = role_id
+        application.message = message
+        application.status = status
+    else:
+        application = models.Application(
+            user_id=user_id,
+            project_id=project_id,
+            role_id=role_id,
+            status=status,
+            message=message,
+        )
+        db.add(application)
+
+    db.commit()
+    db.refresh(application)
+    return application
+
 @app.get("/", response_class=HTMLResponse)
 def home(request: Request, db: Session = Depends(get_db)):
     users = db.query(models.User).limit(10).all()
@@ -319,6 +362,59 @@ def web_recommend_users(request: Request, project_id: int, top_n: int = 10, db: 
         "results": results,
     })
 
+@app.get("/web/projects/{project_id}/applications", response_class=HTMLResponse)
+def web_project_applications(request: Request, project_id: int, db: Session = Depends(get_db)):
+    project = get_project_or_404(db, project_id)
+    applications = (
+        db.query(models.Application)
+        .filter(models.Application.project_id == project_id)
+        .order_by(models.Application.id.desc())
+        .all()
+    )
+    status_labels = {
+        "pending": "대기",
+        "accepted": "선발",
+        "rejected": "거절",
+    }
+    return templates.TemplateResponse("project_applications.html", {
+        "request": request,
+        "project": project,
+        "applications": applications,
+        "status_labels": status_labels,
+    })
+
+@app.post("/web/projects/{project_id}/select-member")
+def web_select_recommended_member(
+    project_id: int,
+    user_id: int = Form(...),
+    db: Session = Depends(get_db),
+):
+    user = ensure_user_exists(db, user_id)
+    project = get_project_or_404(db, project_id)
+    create_or_update_application(
+        db=db,
+        user_id=user.id,
+        project_id=project.id,
+        role_id=user.preferred_role_id,
+        message="추천 팀원으로 선발되었습니다.",
+        status="accepted",
+    )
+    return RedirectResponse(url=f"/web/projects/{project_id}/applications", status_code=303)
+
+@app.post("/web/applications/{application_id}/accept")
+def web_accept_application(application_id: int, db: Session = Depends(get_db)):
+    application = get_application_or_404(db, application_id)
+    application.status = "accepted"
+    db.commit()
+    return RedirectResponse(url=f"/web/projects/{application.project_id}/applications", status_code=303)
+
+@app.post("/web/applications/{application_id}/reject")
+def web_reject_application(application_id: int, db: Session = Depends(get_db)):
+    application = get_application_or_404(db, application_id)
+    application.status = "rejected"
+    db.commit()
+    return RedirectResponse(url=f"/web/projects/{application.project_id}/applications", status_code=303)
+
 @app.get("/web/users/{user_id}/recommendations", response_class=HTMLResponse)
 def web_recommend_projects(request: Request, user_id: int, top_n: int = 10, db: Session = Depends(get_db)):
     user = db.get(models.User, user_id)
@@ -333,11 +429,14 @@ def web_recommend_projects(request: Request, user_id: int, top_n: int = 10, db: 
 
 @app.post("/applications")
 def create_application(payload: schemas.ApplicationCreate, db: Session = Depends(get_db)):
-    app_row = models.Application(**payload.model_dump(), status="pending")
-    db.add(app_row)
-    db.commit()
-    db.refresh(app_row)
-    return app_row
+    return create_or_update_application(
+        db=db,
+        user_id=payload.user_id,
+        project_id=payload.project_id,
+        role_id=payload.role_id,
+        message=payload.message or "",
+        status="pending",
+    )
 
 @app.post("/web/applications")
 def web_apply(
@@ -347,13 +446,12 @@ def web_apply(
     message: str = Form(""),
     db: Session = Depends(get_db),
 ):
-    app_row = models.Application(
+    create_or_update_application(
+        db=db,
         user_id=user_id,
         project_id=project_id,
         role_id=role_id,
-        status="pending",
         message=message,
+        status="pending",
     )
-    db.add(app_row)
-    db.commit()
     return RedirectResponse(url=f"/web/users/{user_id}/recommendations", status_code=303)
